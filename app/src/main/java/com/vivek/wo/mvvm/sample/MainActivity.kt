@@ -1,10 +1,12 @@
 package com.vivek.wo.mvvm.sample
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
+import com.vivek.wo.mvvm.sample.login.LoginActivity
 
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -17,8 +19,13 @@ class MainActivity : AppCompatActivity() {
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+                .setAction("Action", null).show()
         }
+
+        supportFragmentManager.beginTransaction()
+            .add(R.id.main_fragment_container, MainActivityFragment())
+            .commit()
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -32,7 +39,10 @@ class MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_login -> {
+                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

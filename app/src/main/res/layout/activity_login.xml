@@ -1,51 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <data>
 
-        <variable name="viewmodel"
-                  type="com.vivek.wo.mvvm.sample.login.LoginViewModel"/>
+        <variable
+            name="viewmodel"
+            type="com.vivek.wo.mvvm.sample.login.LoginViewModel"/>
     </data>
+
     <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:id="@+id/login_edt_account"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:hint="ACCOUNT"
+            android:text="@={viewmodel.account}"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-        <android.support.design.widget.AppBarLayout
-                android:id="@+id/appbar_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                android:theme="@style/AppTheme.AppBarOverlay">
+        <EditText
+            android:id="@+id/login_edt_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:hint="PASSWORD"
+            android:text="@={viewmodel.password}"
+            app:layout_constraintTop_toBottomOf="@id/login_edt_account"/>
 
-            <android.support.v7.widget.Toolbar
-                    android:id="@+id/toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/colorPrimary"
-                    app:popupTheme="@style/AppTheme.PopupOverlay"/>
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:onClick="@{()->viewmodel.login()}"
+            android:text="LOGIN"
+            app:layout_constraintTop_toBottomOf="@id/login_edt_password"/>
 
-        </android.support.design.widget.AppBarLayout>
-
-        <EditText android:id="@+id/login_edt_account"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginTop="20dp"
-                  app:layout_constraintTop_toBottomOf="@id/appbar_layout"
-                  android:hint="ACCOUNT"
-        />
-
-        <EditText android:id="@+id/login_edt_password" android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginTop="20dp"
-                  app:layout_constraintTop_toBottomOf="@id/login_edt_account"
-                  android:hint="PASSWORD"/>
-
-        <Button app:layout_constraintTop_toBottomOf="@id/login_edt_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="LOGIN"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@{viewmodel.inputMessage}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 
