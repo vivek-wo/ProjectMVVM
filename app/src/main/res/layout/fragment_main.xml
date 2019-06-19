@@ -3,6 +3,7 @@
 
     <data>
 
+        <variable name="viewmodel" type="com.vivek.wo.mvvm.sample.MainViewModel"/>
     </data>
 
     <android.support.v7.widget.RecyclerView
