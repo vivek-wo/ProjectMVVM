@@ -12,6 +12,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+    lateinit var mainViewModel: MainViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -22,8 +24,13 @@ class MainActivity : AppCompatActivity() {
                 .setAction("Action", null).show()
         }
 
+        mainViewModel = MainViewModel()
+
+        val mainActivityFragment = MainActivityFragment()
+        mainActivityFragment.mainViewModel = mainViewModel
+
         supportFragmentManager.beginTransaction()
-            .add(R.id.main_fragment_container, MainActivityFragment())
+            .add(R.id.main_fragment_container, mainActivityFragment)
             .commit()
 
     }
