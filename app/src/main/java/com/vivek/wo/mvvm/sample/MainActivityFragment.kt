@@ -35,7 +35,7 @@ class MainActivityFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         for (i in 1..5) {
-            val userTask = UserTask("", "Title $i", "2019-06-2$i")
+            val userTask = UserTask("123+$i", "Title $i", "2019-06-2$i")
             userTaskList.add(userTask)
         }
 

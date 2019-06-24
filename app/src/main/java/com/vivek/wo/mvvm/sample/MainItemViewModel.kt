@@ -29,6 +29,10 @@ class MainItemViewModel() {
         })
     }
 
+    fun getImageIcon(): String? {
+        return icon.get()
+    }
+
     fun setUserTask(userTask: UserTask) {
         userTaskObservable.set(userTask)
         val task0: UserTask? = userTaskObservable.get()
