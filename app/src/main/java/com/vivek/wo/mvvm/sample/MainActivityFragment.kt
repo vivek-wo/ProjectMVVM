@@ -17,6 +17,8 @@ class MainActivityFragment : Fragment() {
 
     lateinit var mainViewModel: MainViewModel
 
+    var userTaskList: ArrayList<UserTask> = ArrayList()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         fragmentMainBinding = FragmentMainBinding.inflate(inflater, container, false)
         fragmentMainBinding.viewmodel = mainViewModel
@@ -32,6 +34,11 @@ class MainActivityFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        for (i in 1..5) {
+            val userTask = UserTask("", "Title $i", "2019-06-2$i")
+            userTaskList.add(userTask)
+        }
+
         fragmentMainBinding.recycleView.addItemDecoration(
             DividerItemDecoration(
                 context,
@@ -39,27 +46,30 @@ class MainActivityFragment : Fragment() {
             )
         )
 
-        var listAdapter = ListAdapter()
+        var listAdapter = ListAdapter(userTaskList)
         fragmentMainBinding.recycleView.layoutManager = LinearLayoutManager(context)
         fragmentMainBinding.recycleView.adapter = listAdapter
     }
 
-    class ListAdapter : RecyclerView.Adapter<ListAdapter.ViewHolder>() {
+    class ListAdapter(val userTaskList: List<UserTask>) : RecyclerView.Adapter<ListAdapter.ViewHolder>() {
         override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
             val layoutInflater = LayoutInflater.from(p0.context)
             var listItemBinding = ListItemBinding.inflate(layoutInflater, p0, false)
-            return ViewHolder(listItemBinding.root)
+            return ViewHolder(listItemBinding)
         }
 
-        override fun getItemCount(): Int {
-            return 20
-        }
+        override fun getItemCount(): Int = userTaskList.size
 
         override fun onBindViewHolder(p0: ViewHolder, p1: Int) {
+            val userTask = userTaskList[p1]
+            val mainItemViewModel = MainItemViewModel()
+            mainItemViewModel.setUserTask(userTask)
+
+            val binding = p0.binding
+
+            binding.viewmodel = mainItemViewModel
         }
 
-        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-        }
+        class ViewHolder(var binding: ListItemBinding) : RecyclerView.ViewHolder(binding.root)
     }
 }
