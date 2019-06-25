@@ -15,7 +15,7 @@
                 android:id="@+id/item_icon"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                imageUrl="123123"
+                app:remoteImageUrl="@{viewmodel.icon}"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 
