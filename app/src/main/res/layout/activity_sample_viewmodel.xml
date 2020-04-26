@@ -7,7 +7,7 @@
 
         <variable
             name="viewmodel"
-            type="com.vivek.wo.mvvm.sample.databinding.SampleViewModel" />
+            type="com.vivek.wo.mvvm.sample.viewmodel.SampleViewModel" />
     </data>
 
     <android.support.constraint.ConstraintLayout
