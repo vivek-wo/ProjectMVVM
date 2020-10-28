@@ -1,0 +1,29 @@
+ext {
+
+    android = [
+            compileSdkVersion: 29,
+            buildToolsVersion: "30.0.0",
+            minSdkVersion    : 21,
+            targetSdkVersion : 29
+    ]
+
+    deps_junit = "junit:junit:4.12"
+    deps_android_junit = "androidx.test.ext:junit:1.1.2"
+    deps_android_espresso = "androidx.test.espresso:espresso-core:3.3.0"
+
+    def appcompat_version = "1.2.0"
+    deps_appcompat = "androidx.appcompat:appcompat:$appcompat_version"
+    deps_appcompat_resources = "androidx.appcompat:appcompat-resources:$appcompat_version"
+
+    def okhttp3_version = "3.10.0"
+    deps_okhttp3 = "com.squareup.okhttp3:okhttp:${okhttp3_version}"
+    deps_okhttp3_logging_interceptor = "com.squareup.okhttp3:logging-interceptor:${okhttp3_version}"
+
+    def retrofit2_version = "2.4.0"
+    deps_retrofit2 = "com.squareup.retrofit2:retrofit:${retrofit2_version}"
+    deps_retrofit2_converter_gson = "com.squareup.retrofit2:converter-gson:${retrofit2_version}"
+    deps_retrofit2_adapter_rxjava = "com.squareup.retrofit2:adapter-rxjava2:${retrofit2_version}"
+
+    deps_rxjava2_rxjava   = "io.reactivex.rxjava2:rxjava:2.2.9"
+    deps_rxjava2_rxandroid= "io.reactivex.rxjava2:rxandroid:2.1.1"
+}

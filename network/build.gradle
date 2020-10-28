@@ -1,0 +1,46 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+
+    // Testing dependencies
+    testImplementation deps_junit
+    androidTestImplementation deps_android_junit
+    androidTestImplementation deps_android_espresso
+
+    implementation deps_appcompat
+    // For loading and tinting drawables on older versions of the platform
+    implementation deps_appcompat_resources
+
+    implementation deps_okhttp3
+    implementation deps_okhttp3_logging_interceptor
+
+    implementation deps_retrofit2
+    implementation deps_retrofit2_adapter_rxjava
+    implementation deps_retrofit2_converter_gson
+
+    implementation deps_rxjava2_rxjava
+    implementation deps_rxjava2_rxandroid
+}
