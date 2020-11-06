@@ -4,6 +4,7 @@ import com.vivek.wo.entity.Repo;
 import com.vivek.wo.entity.result.ResponseResult;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableTransformer;
 import io.reactivex.schedulers.Schedulers;
 
 public class RemoteApiRepository {
@@ -17,11 +18,22 @@ public class RemoteApiRepository {
         return Holder.INSTANCE;
     }
 
-    private static <T> Observable<ResponseResult<T>> checkCallbackInvalid(
-            Observable<ResponseResult<T>> observable) {
-        //定制统一异常处理
-        return observable.subscribeOn(Schedulers.io()).doOnNext(tResponseResult -> {
+    //方式一
+    private static <T> Observable<T> checkRequestInvalid(
+            Observable<T> observable) {
+        //定制登录失效
+        return observable.subscribeOn(Schedulers.io()).doOnNext(tResult -> {
+            if (tResult instanceof ResponseResult) {
+            }
+        });
+    }
 
+    //方式二
+    private static <T> ObservableTransformer<T, T> checkRequestInvalid() {
+        //定制登录失效
+        return observable -> observable.subscribeOn(Schedulers.io()).doOnNext(tResult -> {
+            if (tResult instanceof ResponseResult) {
+            }
         });
     }
 
@@ -33,7 +45,7 @@ public class RemoteApiRepository {
      * @return
      */
     public Observable<ResponseResult<Repo>> search(String query, int page) {
-        return checkCallbackInvalid(mApiService.search(query, page));
+        return checkRequestInvalid(mApiService.search(query, page));
     }
 
     private static class Holder {
