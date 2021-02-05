@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -18,6 +19,8 @@ public class WebSocketClient {
     private static final String TAG = "WebSocketClient";
     /* Used when actively closes. */
     static final int CLOSE_CLIENT_INITIACTIVE = 1000;
+    /* Used when server not reply. */
+    static final int CLOSE_CLIENT_NOT_REPLY = 1001;
     /* WS 正在打开 */
     static final int WS_OPENING_STATE = 1;
     /* WS 已打开 */
@@ -31,11 +34,18 @@ public class WebSocketClient {
     /* WS 错误失败 */
     static final int WS_ERROR_STATE = -1;
 
-    private static final String HEART_RESPONSE_FILTER = "ok";//定义心跳返回内容
+    private static final String DEFAULT_HEART_RESPONSE = "ok";//定义心跳返回内容
+
     private static ScheduledExecutorService singleExecutorService;
+    private WebSocketMessageListener mMessageListener;
     private WebSocket mWebSocket;
-    private ScheduledFuture mDaemonFuture;
+    private ScheduledFuture mHeartFuture;
+    private ScheduledFuture mResetFuture;
     private int mConnectState;
+    /*心跳发送次数统计*/
+    private AtomicInteger mHeartCount = new AtomicInteger(0);
+    private String mHeartMessage;
+    private boolean mIsActiveClose = false;
     OkHttpClient okHttpClient;
     String wsUrl;
     int connectTimeout;
@@ -64,28 +74,67 @@ public class WebSocketClient {
                 .build();
     }
 
-    public void setup() {
+    public void initHeartMessage(String heartMessage) {
+        mHeartMessage = heartMessage;
+    }
+
+    public synchronized void start() {
+        if (mWebSocket != null) {
+            Log.w(TAG, "ws client started, need call stop.");
+            return;
+        }
+        Log.i(TAG, "ws client start.");
+        startWebSocket();
+    }
+
+    private void startWebSocket() {
+        mIsActiveClose = false;
         Request request = new Request.Builder().url(this.wsUrl).build();
         mWebSocket = this.okHttpClient.newWebSocket(request, mWebSocketListener);
         setConnectState(WS_OPENING_STATE);
-        mDaemonFuture = singleExecutorService.scheduleWithFixedDelay(daemonRunnable,
-                20, 10, TimeUnit.SECONDS);
     }
 
-    public void stop() {
+    public synchronized void stop() {
         if (mWebSocket == null) {
-            Log.w(TAG, "ws client not setup.");
+            Log.w(TAG, "ws client not start.");
             return;
         }
+        mIsActiveClose = true;
+        Log.i(TAG, "ws client stop.");
         mWebSocket.close(CLOSE_CLIENT_INITIACTIVE, null);
         setConnectState(WS_CLOSING_STATE);
-        if (mDaemonFuture != null) {
-            mDaemonFuture.cancel(true);
+        cancelResetFuture();
+        cancelHeartFuture();
+        mWebSocket = null;
+    }
+
+    private synchronized void setupHeartFuture() {
+        if (!mIsActiveClose) {
+            mHeartCount.set(0);
+            mHeartFuture = singleExecutorService.scheduleAtFixedRate(() -> {
+                sendHeartMessage();
+            }, 0, 5, TimeUnit.SECONDS);
         }
+    }
+
+    private synchronized void resetWebSocket() {
+        cancelHeartFuture();
+        mResetFuture = singleExecutorService.schedule(() -> {
+            synchronized (this) {
+                if (!mIsActiveClose) {
+                    Log.i(TAG, "ws client reset.");
+                    startWebSocket();
+                }
+            }
+        }, 5, TimeUnit.SECONDS);
     }
 
     public boolean isConnected() {
-        return true;
+        return mConnectState == WS_ONMESSAGE_STATE;
+    }
+
+    public void setWebSocketMessageListener(WebSocketMessageListener listener) {
+        mMessageListener = listener;
     }
 
     private WebSocketListener mWebSocketListener = new WebSocketListener() {
@@ -93,13 +142,21 @@ public class WebSocketClient {
         public void onOpen(WebSocket webSocket, Response response) {
             super.onOpen(webSocket, response);
             setConnectState(WS_OPENED_STATE);
-            //启动定时心跳包
+            setupHeartFuture();
         }
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
             super.onMessage(webSocket, text);
             setConnectState(WS_ONMESSAGE_STATE);
+            System.out.println("ws message: " + text);
+            //判断是否是心跳回复
+            if (isHeartMessageReply(text)) {
+                return;
+            }
+            if (mMessageListener != null) {
+                mMessageListener.onMessage(WebSocketClient.this, text);
+            }
         }
 
         @Override
@@ -118,12 +175,14 @@ public class WebSocketClient {
         public void onClosed(WebSocket webSocket, int code, String reason) {
             super.onClosed(webSocket, code, reason);
             setConnectState(WS_CLOSED_STATE);
+            resetWebSocket();
         }
 
         @Override
         public void onFailure(WebSocket webSocket, Throwable t, Response response) {
             super.onFailure(webSocket, t, response);
             setConnectState(WS_ERROR_STATE);
+            resetWebSocket();
         }
     };
 
@@ -132,20 +191,53 @@ public class WebSocketClient {
         mConnectState = connectState;
     }
 
-    private void sendHeartMessage() {
-
+    /**
+     * 发送心跳数据
+     */
+    void sendHeartMessage() {
+        int count = mHeartCount.getAndIncrement();
+        Log.d(TAG, "Heart " + mHeartMessage + ", count: " + mHeartCount.get());
+        if (count > 0) {
+            mWebSocket.close(CLOSE_CLIENT_NOT_REPLY, null);
+        } else {
+            mWebSocket.send(mHeartMessage);
+        }
     }
 
-    private final Runnable daemonRunnable = () -> {
+    /**
+     * 是否心跳回复数据
+     *
+     * @param text
+     * @return
+     */
+    boolean isHeartMessageReply(String text) {
+        boolean isReply = DEFAULT_HEART_RESPONSE.equals(text);
+        if (isReply) {
+            mHeartCount.getAndSet(0);
+        }
+        return isReply;
+    }
 
-    };
+    private void cancelHeartFuture() {
+        if (mHeartFuture != null) {
+            mHeartFuture.cancel(true);
+            mHeartFuture = null;
+        }
+    }
+
+    private void cancelResetFuture() {
+        if (mResetFuture != null) {
+            mResetFuture.cancel(true);
+            mResetFuture = null;
+        }
+    }
 
     public static class Builder {
         OkHttpClient okHttpClient;
         String wsUrl;
-        int connectTimeout;
-        int readTimeout;
-        int writeTimeout;
+        int connectTimeout = 10;
+        int readTimeout = 5;
+        int writeTimeout = 5;
 
         public Builder setOkHttpClient(OkHttpClient okHttpClient) {
             this.okHttpClient = okHttpClient;

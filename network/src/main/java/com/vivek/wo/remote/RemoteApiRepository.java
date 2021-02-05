@@ -2,6 +2,7 @@ package com.vivek.wo.remote;
 
 import com.vivek.wo.entity.Repo;
 import com.vivek.wo.entity.result.ResponseResult;
+import com.vivek.wo.remote.proxy.ProxyHelper;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
@@ -11,7 +12,8 @@ public class RemoteApiRepository {
     private ApiService mApiService;
 
     private RemoteApiRepository() {
-        mApiService = new NetworkServiceBuilder().create(ApiService.class);
+        ApiService apiService = new NetworkServiceBuilder().create(ApiService.class);
+        mApiService = ProxyHelper.create(ApiService.class, apiService);
     }
 
     public static RemoteApiRepository get() {

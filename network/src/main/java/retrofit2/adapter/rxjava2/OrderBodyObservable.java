@@ -31,7 +31,7 @@ public class OrderBodyObservable<T> extends Observable<T> {
 
         @Override
         public void onNext(R r) {
-            //TODO 定制返回逻辑
+            //TODO 定制返回逻辑,可解析统一响应的处理，抛出异常或者继续返回
             observer.onNext(r);
         }
 
