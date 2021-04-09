@@ -41,4 +41,6 @@ dependencies {
     androidTestImplementation deps_android_junit
     androidTestImplementation deps_android_espresso
 
+    implementation deps_material
+
 }

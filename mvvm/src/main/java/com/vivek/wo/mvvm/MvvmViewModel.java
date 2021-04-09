@@ -5,9 +5,9 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
-public class BaseViewModel extends AndroidViewModel {
+public class MvvmViewModel extends AndroidViewModel {
 
-    public BaseViewModel(@NonNull Application application) {
+    public MvvmViewModel(@NonNull Application application) {
         super(application);
     }
 
